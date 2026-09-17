@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>윈도우 메모장 스타일 텍스트 이미지 생성기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 25px;
+            width: 100%;
+            max-width: 1350px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* 윈도우 창 스타일 컨테이너 */
+        .win-window {
+            background-color: #f0f0f0;
+            border: 1px solid #707070;
+            box-shadow: 4px 4px 15px rgba(0,0,0,0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        /* 윈도우 타이틀바 */
+        .win-titlebar {
+            background: linear-gradient(to right, #0055ea, #1e90ff);
+            color: white;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .win-titlebar.control-title {
+            background: linear-gradient(to right, #333333, #666666);
+        }
+
+        .win-buttons span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: #dcdcdc;
+            border: 1px solid #707070;
+            margin-left: 4px;
+            text-align: center;
+            font-size: 9px;
+            color: #333;
+            line-height: 10px;
+            cursor: pointer;
+        }
+
+        /* 메뉴바 느낌 */
+        .win-menubar {
+            background-color: #f0f0f0;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-bottom: 1px solid #dfdfdf;
+            color: #333;
+        }
+
+        .win-menubar span {
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .win-menubar span:hover {
+            background-color: #e5f3ff;
+            padding: 2px 4px;
+        }
+
+        /* 컨트롤 패널 (왼쪽) */
+        .control-panel {
+            width: 400px;
+            box-sizing: border-box;
+        }
+
+        .control-body {
+            padding: 15px;
+            background-color: #f0f0f0;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        /* 미세 조절 버튼 구조 */
+        .step-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-btn {
+            background-color: #e1e1e1;
+            border: 1px solid #707070;
+            width: 26px;
+            height: 26px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .step-btn:active {
+            background-color: #ccc;
+        }
+
+        /* 커스텀 프로그레스 슬라이더 스타일 (동그라미 제거 + 어두운 회색 톤) */
+        .range-container {
+            flex: 1;
+            position: relative;
+            height: 8px;
+            background: #dfdfdf;
+            border: 1px solid #a0a0a0;
+            border-radius: 2px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .range-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: #666666; /* 어두운 회색 채워진 바 */
+            pointer-events: none;
+        }
+
+        .step-control input[type="range"] {
+            position: absolute;
+            width: 100%;
+            margin: 0;
+            opacity: 0; /* 기본 슬라이더는 투명하게 처리하되 기능은 유지 */
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .step-control span.val-text {
+            font-size: 12px;
+            color: #333;
+            width: 45px;
+            text-align: right;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            padding: 8px;
+            border: 1px solid #7f9db9;
+            border-radius: 0;
+            resize: vertical;
+            font-size: 13px;
+            box-sizing: border-box;
+            font-family: 'Consolas', monospace;
+            background-color: #ffffff;
+            color: #000;
+        }
+
+        .win-button {
+            background-color: #e1e1e1;
+            color: #000;
+            border: 1px solid #707070;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-family: 'Malgun Gothic', sans-serif;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .win-button:hover {
+            background-color: #e5f3ff;
+            border-color: #0078d7;
+        }
+
+        /* 미리보기 영역 (오른쪽) */
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .preview-content {
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+
+        #capture-box {
+            background-color: #ffffff;
+            padding: 60px 60px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            width: max-content;
+            max-width: 900px; 
+            transition: background-color 0.1s;
+        }
+
+        .output-text {
+            font-family: 'Consolas', 'Malgun Gothic', monospace;
+            color: #000000;
+            white-space: pre; 
+        }
+
+        .status-bar {
+            background-color: #f0f0f0;
+            border-top: 1px solid #dfdfdf;
+            padding: 4px 10px;
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <!-- 1. 컨트롤 창 (왼쪽) -->
+        <div class="win-window control-panel">
+            <div class="win-titlebar control-title">
+                <span>조정 패널 - Notepad</span>
+                <div class="win-buttons"><span>_</span><span>□</span><span>×</span></div>
+            </div>
+            <div class="win-menubar">
+                <span>파일(F)</span><span>편집(E)</span><span>서식(O)</span><span>보기(V)</span><span>도움말(H)</span>
+            </div>
+            <div class="control-body">
+                <div class="control-group">
+                    <label>텍스트 입력</label>
+                    <textarea id="userInput" placeholder="텍스트를 입력하세요...">여기에 내용을 입력하세요.</textarea>
+                </div>
+
+                <div class="control-group">
+                    <label>글자 크기 (Font Size)</label>
+                    <div class="step-control">
+                        <button class="step-btn" onclick="adjustValue('fontSizeRange', -1)">-</button>
+                        <div class="range-container">
+                            <div class="range-fill" id="fontSizeFill"></div>
+                            <input type="range" id="fontSizeRange" min="10" max="32" value="15" step="1">
+                        </div>
+                        <button class="step-btn" onclick="adjustValue('fontSizeRange', 1)">+</button>
+                        <span class="val-text" id="fontSizeVal">15px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>자간 (Letter Spacing)</label>
+                    <div class="step-control">
+                        <button class="step-btn" onclick="adjustValue('letterSpacingRange', -0.5)">-</button>
+                        <div class="range-container">
+                            <div class="range-fill" id="letterSpacingFill"></div>
+                            <input type="range" id="letterSpacingRange" min="-5" max="10" value="-2" step="0.5">
+                        </div>
+                        <button class="step-btn" onclick="adjustValue('letterSpacingRange', 0.5)">+</button>
+                        <span class="val-text" id="letterSpacingVal">-2px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>행간 (Line Height)</label>
+                    <div class="step-control">
+                        <button class="step-btn" onclick="adjustValue('lineHeightRange', -0.1)">-</button>
+                        <div class="range-container">
+                            <div class="range-fill" id="lineHeightFill"></div>
+                            <input type="range" id="lineHeightRange" min="1.0" max="3.0" value="1.6" step="0.1">
+                        </div>
+                        <button class="step-btn" onclick="adjustValue('lineHeightRange', 0.1)">+</button>
+                        <span class="val-text" id="lineHeightVal">1.6</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>이미지 배경 밝기 (Background Brightness)</label>
+                    <div class="step-control">
+                        <button class="step-btn" onclick="adjustValue('bgBrightnessRange', -5)">-</button>
+                        <div class="range-container">
+                            <div class="range-fill" id="bgBrightnessFill"></div>
+                            <input type="range" id="bgBrightnessRange" min="200" max="255" value="250" step="1">
+                        </div>
+                        <button class="step-btn" onclick="adjustValue('bgBrightnessRange', 5)">+</button>
+                        <span class="val-text" id="bgBrightnessVal">250</span>
+                    </div>
+                </div>
+
+                <button class="win-button" onclick="saveAsImage()">이미지로 저장하기 (.PNG)</button>
+            </div>
+            <div class="status-bar">
+                <span>UTF-8</span>
+                <span>Ln 1, Col 1</span>
+            </div>
+        </div>
+
+        <!-- 2. 미리보기 창 (오른쪽) -->
+        <div class="preview-area">
+            <div class="win-window">
+                <div class="win-titlebar">
+                    <span>미리보기 (저장될 영역) - Notepad</span>
+                    <div class="win-buttons"><span>_</span><span>□</span><span>×</span></div>
+                </div>
+                <div class="win-menubar">
+                    <span>파일(F)</span><span>편집(E)</span><span>서식(O)</span><span>보기(V)</span><span>도움말(H)</span>
+                </div>
+                <div class="preview-content">
+                    <div id="capture-box">
+                        <div id="renderText" class="output-text"></div>
+                    </div>
+                </div>
+                <div class="status-bar">
+                    <span>100%</span>
+                    <span>Windows (CRLF)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userInput = document.getElementById('userInput');
+        const renderText = document.getElementById('renderText');
+        const captureBox = document.getElementById('capture-box');
+        
+        const fontSizeRange = document.getElementById('fontSizeRange');
+        const fontSizeVal = document.getElementById('fontSizeVal');
+        const fontSizeFill = document.getElementById('fontSizeFill');
+        
+        const letterSpacingRange = document.getElementById('letterSpacingRange');
+        const letterSpacingVal = document.getElementById('letterSpacingVal');
+        const letterSpacingFill = document.getElementById('letterSpacingFill');
+        
+        const lineHeightRange = document.getElementById('lineHeightRange');
+        const lineHeightVal = document.getElementById('lineHeightVal');
+        const lineHeightFill = document.getElementById('lineHeightFill');
+
+        const bgBrightnessRange = document.getElementById('bgBrightnessRange');
+        const bgBrightnessVal = document.getElementById('bgBrightnessVal');
+        const bgBrightnessFill = document.getElementById('bgBrightnessFill');
+
+        function adjustValue(elementId, amount) {
+            const el = document.getElementById(elementId);
+            let val = parseFloat(el.value) + amount;
+            let min = parseFloat(el.min);
+            let max = parseFloat(el.max);
+            
+            if (val < min) val = min;
+            if (val > max) val = max;
+            
+            el.value = val;
+            updatePreview();
+        }
+
+        function updateFill(rangeEl, fillEl) {
+            const min = parseFloat(rangeEl.min);
+            const max = parseFloat(rangeEl.max);
+            const val = parseFloat(rangeEl.value);
+            const percent = ((val - min) / (max - min)) * 100;
+            fillEl.style.width = percent + '%';
+        }
+
+        function updatePreview() {
+            renderText.textContent = userInput.value;
+
+            const fSize = fontSizeRange.value + 'px';
+            const lSpacing = letterSpacingRange.value + 'px';
+            const lHeight = lineHeightRange.value;
+            const bgBright = parseInt(bgBrightnessRange.value);
+
+            fontSizeVal.textContent = fSize;
+            letterSpacingVal.textContent = lSpacing;
+            lineHeightVal.textContent = lHeight;
+            bgBrightnessVal.textContent = bgBright;
+
+            updateFill(fontSizeRange, fontSizeFill);
+            updateFill(letterSpacingRange, letterSpacingFill);
+            updateFill(lineHeightRange, lineHeightFill);
+            updateFill(bgBrightnessRange, bgBrightnessFill);
+
+            renderText.style.fontSize = fSize;
+            renderText.style.letterSpacing = lSpacing;
+            renderText.style.lineHeight = lHeight;
+
+            const hexColor = bgBright.toString(16).padStart(2, '0');
+            captureBox.style.backgroundColor = `#${hexColor}${hexColor}${hexColor}`;
+        }
+
+        userInput.addEventListener('input', updatePreview);
+        fontSizeRange.addEventListener('input', updatePreview);
+        letterSpacingRange.addEventListener('input', updatePreview);
+        lineHeightRange.addEventListener('input', updatePreview);
+        bgBrightnessRange.addEventListener('input', updatePreview);
+        
+        updatePreview();
+
+        function saveAsImage() {
+            const target = document.getElementById('capture-box');
+            
+            html2canvas(target, {
+                scale: 2,
+                backgroundColor: target.style.backgroundColor,
+                windowWidth: target.scrollWidth,
+                windowHeight: target.scrollHeight
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'notepad_style_image.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+
+</body>
+</html>
