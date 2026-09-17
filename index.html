@@ -6,7 +6,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            /* 윈도우 기본 픽셀/고딕 느낌의 시스템 폰트 적용 */
+            font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 30px 20px;
@@ -147,7 +148,7 @@
             left: 0;
             top: 0;
             height: 100%;
-            background-color: #666666; /* 어두운 회색 채워진 바 */
+            background-color: #666666;
             pointer-events: none;
         }
 
@@ -155,7 +156,7 @@
             position: absolute;
             width: 100%;
             margin: 0;
-            opacity: 0; /* 기본 슬라이더는 투명하게 처리하되 기능은 유지 */
+            opacity: 0;
             cursor: pointer;
             height: 100%;
         }
@@ -176,7 +177,8 @@
             resize: vertical;
             font-size: 13px;
             box-sizing: border-box;
-            font-family: 'Consolas', monospace;
+            /* 입력창도 동일한 시스템 폰트 적용 */
+            font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             background-color: #ffffff;
             color: #000;
         }
@@ -187,7 +189,6 @@
             border: 1px solid #707070;
             padding: 8px 15px;
             font-size: 13px;
-            font-family: 'Malgun Gothic', sans-serif;
             cursor: pointer;
             width: 100%;
             text-align: center;
@@ -222,7 +223,8 @@
         }
 
         .output-text {
-            font-family: 'Consolas', 'Malgun Gothic', monospace;
+            /* 출력 텍스트에도 윈도우 기본 픽셀/고딕 폰트 적용 */
+            font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             color: #000000;
             white-space: pre; 
         }
@@ -253,7 +255,7 @@
             <div class="control-body">
                 <div class="control-group">
                     <label>텍스트 입력</label>
-                    <textarea id="userInput" placeholder="텍스트를 입력하세요...">여기에 내용을 입력하세요.</textarea>
+                    <textarea id="userInput">여기에 내용을 입력하세요.</textarea>
                 </div>
 
                 <div class="control-group">
