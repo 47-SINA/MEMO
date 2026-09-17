@@ -2,11 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>MEMO.ME</title>
+    <title>윈도우 메모장 스타일 텍스트 이미지 생성기</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            /* 윈도우 기본 픽셀/고딕 느낌의 시스템 폰트 적용 */
             font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             background-color: #ffffff;
             margin: 0;
@@ -130,7 +129,7 @@
             background-color: #ccc;
         }
 
-        /* 커스텀 프로그레스 슬라이더 스타일 (동그라미 제거 + 어두운 회색 톤) */
+        /* 커스텀 프로그레스 슬라이더 스타일 */
         .range-container {
             flex: 1;
             position: relative;
@@ -177,7 +176,6 @@
             resize: vertical;
             font-size: 13px;
             box-sizing: border-box;
-            /* 입력창도 동일한 시스템 폰트 적용 */
             font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             background-color: #ffffff;
             color: #000;
@@ -223,10 +221,11 @@
         }
 
         .output-text {
-            /* 출력 텍스트에도 윈도우 기본 픽셀/고딕 폰트 적용 */
             font-family: 'Gulim', '굴림', 'Dotum', '돋움', sans-serif;
             color: #000000;
-            white-space: pre; 
+            white-space: pre;
+            font-weight: normal; /* 폰트가 두껍게 뭉개지는 현상 방지 */
+            -webkit-font-smoothing: antialiased; /* 폰트 안티앨리어싱 보정 */
         }
 
         .status-bar {
@@ -421,10 +420,10 @@
             const target = document.getElementById('capture-box');
             
             html2canvas(target, {
-                scale: 2,
+                scale: 3, /* 해상도를 높여서 폰트가 부드럽고 얇게 표현되도록 수정 */
                 backgroundColor: target.style.backgroundColor,
-                windowWidth: target.scrollWidth,
-                windowHeight: target.scrollHeight
+                useCORS: true,
+                logging: false
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'notepad_style_image.png';
